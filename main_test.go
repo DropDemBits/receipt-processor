@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"receipt-processor/model"
 	"receipt-processor/routes"
 	"strings"
@@ -137,4 +139,58 @@ func TestGetPointsRouteInvalid(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestExampleData(t *testing.T) {
+	paths, err := filepath.Glob(filepath.Join("testdata", "*.request.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for _, requestPath := range paths {
+		expectPath := strings.Replace(requestPath, ".request.json", ".expect.json", 1)
+		testName := strings.TrimSuffix(requestPath, ".request.json")
+
+		t.Run(testName, func(t *testing.T) {
+			requestBody, err := os.ReadFile(requestPath)
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			expectBody, err := os.ReadFile(expectPath)
+			if !assert.NoError(t, err) {
+				return
+			}
+
+			router := routes.Router()
+			var body struct {
+				Id string `json:"id"`
+			}
+
+			// Send post process request
+			{
+				w := httptest.NewRecorder()
+				postReq, _ := http.NewRequest("POST", "/receipts/process", strings.NewReader(string(requestBody)))
+				router.ServeHTTP(w, postReq)
+
+				assert.Equal(t, http.StatusOK, w.Code)
+
+				err := json.Unmarshal(w.Body.Bytes(), &body)
+				if !assert.NoError(t, err) {
+					return
+				}
+			}
+
+			// Retrive points body
+			{
+				w := httptest.NewRecorder()
+				getReq, _ := http.NewRequest("GET", fmt.Sprintf("/receipts/%s/points", body.Id), nil)
+				router.ServeHTTP(w, getReq)
+
+				assert.Equal(t, http.StatusOK, w.Code)
+
+				assert.JSONEq(t, string(expectBody), w.Body.String())
+			}
+		})
+	}
 }
