@@ -348,7 +348,7 @@ func testRule(t *testing.T, group string, tests []testCase) {
 
 	for _, tc := range tests {
 		t.Run(group, func(t *testing.T) {
-			// t.Parallel()
+			t.Parallel()
 
 			points, err := rules.Process(&tc.recepit)
 			if assert.NoError(t, err) {
