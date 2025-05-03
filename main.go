@@ -7,5 +7,6 @@ import (
 func main() {
 	r := routes.Router()
 
+	r.SetTrustedProxies(nil)
 	r.Run()
 }
