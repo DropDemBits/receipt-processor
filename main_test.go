@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"receipt-processor/model"
@@ -17,7 +18,7 @@ func TestProcessRoute(t *testing.T) {
 	router := routes.Router()
 
 	receipt := model.Receipt{
-		Retailer:     "!",
+		Retailer:     "-",
 		PurchaseDate: "2025-05-02",
 		PurchaseTime: "13:52",
 		Total:        "0.01",
@@ -74,7 +75,7 @@ func TestGetPointsRoute(t *testing.T) {
 	router := routes.Router()
 
 	receipt := model.Receipt{
-		// +11 points (11 alphanumeric chars)
+		// +12 points (12 alphanumeric chars)
 		Retailer: "Supermarket 1",
 		// +6 points (day is odd)
 		PurchaseDate: "2025-05-03",
@@ -85,6 +86,7 @@ func TestGetPointsRoute(t *testing.T) {
 		// +0 points (0 pairs of 2)
 		Items: []model.Item{
 			{
+				// +0 points (not a multiple of 3)
 				ShortDescription: "Thing", Price: "0.01",
 			},
 		},
@@ -110,7 +112,7 @@ func TestGetPointsRoute(t *testing.T) {
 
 	{
 		w := httptest.NewRecorder()
-		getReq, _ := http.NewRequest("GET", "/receipts/"+body.Id+"/points", nil)
+		getReq, _ := http.NewRequest("GET", fmt.Sprintf("/receipts/%s/points", body.Id), nil)
 		router.ServeHTTP(w, getReq)
 
 		assert.Equal(t, http.StatusOK, w.Code)
@@ -123,7 +125,7 @@ func TestGetPointsRoute(t *testing.T) {
 			return
 		}
 
-		assert.Equal(t, points.Points, 27)
+		assert.Equal(t, points.Points, 28)
 	}
 }
 

@@ -13,7 +13,7 @@ func Router() *gin.Engine {
 	{
 		receipts := r.Group("/receipts")
 		receipts.POST("/process", receipt.Process)
-		receipts.POST("/:id/points", receipt.GetPoints)
+		receipts.GET("/:id/points", receipt.GetPoints)
 	}
 
 	return r

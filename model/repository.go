@@ -10,6 +10,13 @@ type Repository[K comparable, V any] struct {
 	values_lock sync.Mutex
 }
 
+func NewRepository[K comparable, V any]() *Repository[K, V] {
+	return &Repository[K, V]{
+		values:      map[K]V{},
+		values_lock: sync.Mutex{},
+	}
+}
+
 // Add an object to the repository.
 // Returns false if key is already in the repository, true otherwise.
 func (r *Repository[K, V]) Add(key K, value V) bool {

@@ -2,7 +2,7 @@ package model
 
 import "github.com/google/uuid"
 
-var processedReceiptRepo = new(Repository[string, ProcessedReceipt])
+var processedReceiptRepo = NewRepository[string, ProcessedReceipt]()
 
 // A processed receipt, including how many points to award.
 type ProcessedReceipt struct {
