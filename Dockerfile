@@ -7,6 +7,7 @@ ENV PORT=8080
 
 # Copy source files
 COPY controllers ./controllers
+COPY processor ./processor
 COPY model ./model
 COPY routes ./routes
 COPY main.go ./
